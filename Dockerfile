@@ -13,7 +13,11 @@ RUN pip install --no-cache-dir -r requirements.txt
 COPY src/ ./src/
 COPY data/ ./data/
 COPY scripts/entrypoint.sh ./scripts/entrypoint.sh
-RUN chmod +x ./scripts/entrypoint.sh
+# Normalitza els finals de línia per si el fitxer arriba amb CRLF
+# (típic si es clona a Windows amb core.autocrlf activat) — sense
+# això, el shebang "#!/usr/bin/env bash" es trenca dins Linux.
+RUN sed -i 's/\r$//' ./scripts/entrypoint.sh \
+    && chmod +x ./scripts/entrypoint.sh
 
 EXPOSE 8501
 

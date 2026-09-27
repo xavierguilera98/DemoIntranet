@@ -1,0 +1,5 @@
+# Força finals de línia estil Unix (LF) per als scripts de shell,
+# independentment de la configuració de core.autocrlf de qui clona
+# el repo (evita que Windows els converteixi a CRLF i trenqui el
+# shebang dins els contenidors Linux).
+*.sh text eol=lf
