@@ -1,0 +1,27 @@
+services:
+  ollama:
+    image: ollama/ollama
+    volumes:
+      - ollama_data:/root/.ollama
+    # Descomenta si vols parlar amb Ollama directament des del teu
+    # ordinador (per exemple per fer proves amb curl):
+    # ports:
+    #   - "11434:11434"
+
+  app:
+    build: .
+    depends_on:
+      - ollama
+    environment:
+      OLLAMA_BASE_URL: http://ollama:11434
+      CHAT_MODEL: llama3.2:1b
+      EMBEDDING_MODEL: nomic-embed-text
+      CHROMA_PERSIST_DIR: /data/chroma_db
+    volumes:
+      - chroma_data:/data/chroma_db
+    ports:
+      - "8501:8501"
+
+volumes:
+  ollama_data:
+  chroma_data:
