@@ -6,6 +6,10 @@ langchain==0.3.7
 langchain-ollama==0.2.0
 langchain-chroma==0.1.4
 langchain-community==0.3.5
+langchain-text-splitters==0.3.2
 
 # Base de dades vectorial
 chromadb==0.5.20
+
+# Configuració via .env
+python-dotenv==1.0.1
