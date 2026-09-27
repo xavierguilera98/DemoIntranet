@@ -1,0 +1,22 @@
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.venv/
+venv/
+
+# Entorn
+.env
+
+# Dades generades (base de dades vectorial local)
+chroma_db/
+data/chroma/
+
+# Ollama (si es descarreguen models localment fora de Docker)
+.ollama/
+
+# Streamlit
+.streamlit/secrets.toml
+
+# Sistema
+.DS_Store
