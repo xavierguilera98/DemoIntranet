@@ -97,6 +97,36 @@ Amb els documents inclosos a `data/docs/`, pots provar:
 - «Quina API exposa Ollama?» (hauria de dir que no ho sap — no és
   informació que hi hagi als documents indexats)
 
+## Diagnosticar respostes dolentes (retrieval vs. model)
+
+Quan el xatbot no respon bé, val la pena distingir **on** falla:
+
+- **Falla el retrieval** (el fragment amb la resposta ni s'ha recuperat) → cal
+  pujar `K_FRAGMENTS` a `src/rag.py` o `CHUNK_SIZE` a `src/ingest.py`.
+- **Falla el model** (el fragment correcte s'ha recuperat, però la resposta
+  segueix sent dolenta o inventada) → és una limitació del model de xat
+  triat (`llama3.2:1b` és molt petit); caldria un model més gran.
+
+Per veure exactament quins fragments es recuperen per a cada pregunta:
+
+```bash
+docker compose exec app python src/rag.py --debug
+```
+
+**Important:** si canvies `CHUNK_SIZE` o els documents de `data/docs/`, cal
+refer la indexació — l'entrypoint només l'executa si la base vectorial
+encara no existeix. Per forçar-ho:
+
+```bash
+docker compose down
+docker volume ls               # busca el volum "..._chroma_data"
+docker volume rm demointranet_chroma_data
+docker compose up --build
+```
+
+(Això no esborra els models d'Ollama, que viuen en un volum diferent —
+no cal tornar-los a descarregar.)
+
 ## Què quedaria fora d'aquest MVP
 
 Aquesta demo prioritza mostrar el mecanisme complet abans que

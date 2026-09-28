@@ -28,11 +28,14 @@ EMBEDDING_MODEL = os.environ.get("EMBEDDING_MODEL", "nomic-embed-text")
 CHROMA_PERSIST_DIR = os.environ.get("CHROMA_PERSIST_DIR", "./chroma_db")
 DOCS_DIR = Path(__file__).resolve().parent.parent / "data" / "docs"
 
-# Fragments petits: als documents d'exemple (curts) n'hi ha prou, i
-# fragments petits fan que la cerca de "quin tros és més rellevant"
-# sigui més precisa.
-CHUNK_SIZE = 500
-CHUNK_OVERLAP = 50
+# Amb fragments massa petits, una secció (ex. "## Models explorats")
+# pot quedar separada de la frase que dona el context semàntic (ex.
+# "deep learning" surt al paràgraf anterior, no al fragment amb els
+# noms dels models) — això fa que la cerca no trobi el fragment
+# correcte encara que la resposta hi sigui. Fragments una mica més
+# grans redueixen aquest risc als documents curts d'aquesta demo.
+CHUNK_SIZE = 800
+CHUNK_OVERLAP = 100
 
 
 def carregar_documents():
