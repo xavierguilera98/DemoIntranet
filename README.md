@@ -107,6 +107,15 @@ Quan el xatbot no respon bé, val la pena distingir **on** falla:
   segueix sent dolenta o inventada) → és una limitació del model de xat
   triat (`llama3.2:1b` és molt petit); caldria un model més gran.
 
+**Determinisme:** el retrieval (Chroma) és pràcticament determinista — la
+mateixa pregunta recupera sempre els mateixos fragments. La generació de la
+resposta (`ChatOllama`) és qui pot variar entre crides, perquè un LLM
+mostreja la següent paraula segons `temperature` en lloc d'escollir sempre
+la més probable. Aquest repositori fa servir `temperature=0.0` perquè la
+resposta sigui reproduïble (mateixa pregunta + mateix context → mateixa
+resposta) — a costa de perdre la variació "creativa" que és útil en un xat
+conversacional però no en un cas d'ús de RAG/QA.
+
 Per veure exactament quins fragments es recuperen per a cada pregunta:
 
 ```bash

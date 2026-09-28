@@ -93,7 +93,15 @@ def construir_cadena(retriever=None):
     model = ChatOllama(
         model=CHAT_MODEL,
         base_url=OLLAMA_BASE_URL,
-        temperature=0.2,
+        # temperature=0 fa que el model sempre triï el token més
+        # probable (decodificació "greedy") en lloc de mostrejar-lo.
+        # Amb un model tan petit, les probabilitats entre "responc" i
+        # "no ho sé" solen estar molt igualades — amb temperature>0
+        # (mostreig) això fa que la mateixa pregunta, amb el mateix
+        # context recuperat, doni respostes diferents en cada crida.
+        # Per a un cas d'ús de RAG/QA (volem consistència, no
+        # creativitat), temperature=0 és la pràctica estàndard.
+        temperature=0.0,
     )
 
     prompt = ChatPromptTemplate.from_template(PROMPT_TEMPLATE)
