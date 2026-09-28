@@ -102,10 +102,33 @@ Amb els documents inclosos a `data/docs/`, pots provar:
 Quan el xatbot no respon bé, val la pena distingir **on** falla:
 
 - **Falla el retrieval** (el fragment amb la resposta ni s'ha recuperat) → cal
-  pujar `K_FRAGMENTS` a `src/rag.py` o `CHUNK_SIZE` a `src/ingest.py`.
-- **Falla el model** (el fragment correcte s'ha recuperat, però la resposta
+  revisar `K_FRAGMENTS` a `src/rag.py` o com es trossegen els documents a
+  `src/ingest.py`.
+- **Falla el model** (el document correcte s'ha recuperat, però la resposta
   segueix sent dolenta o inventada) → és una limitació del model de xat
   triat (`llama3.2:1b` és molt petit); caldria un model més gran.
+
+**Sobre chunk_size i k, un avís d'una regressió real:** la primera versió
+d'aquesta demo trossejava els documents en fragments petits (`chunk_size=500`)
+i recuperava `k=3`. Amb la pregunta *"quins models de deep learning es van
+fer servir al TFM?"* fallava perquè el splitter sempre talla als títols
+(`##`), així que la frase amb "deep learning" i la llista de models queien en
+fragments diferents — i `k=3` no n'incloia prou perquè hi coincidissin
+tots dos. Pujar `chunk_size` a 800 **no ho arregla** (el tall segueix sent
+al mateix lloc); calia pujar `k` a 4 perquè els dos fragments hi cabessin
+alhora. Però amb un corpus de només ~20 fragments en total, `k=4` arrossega
+gairebé mig corpus a cada pregunta — inclosos trossos sense relació —, i un
+model tan petit es confon amb tant de context barrejat i acaba responent
+"no ho sé" fins i tot quan la informació hi és.
+
+La solució final: amb documents tan curts com els d'aquesta demo (cap supera
+els ~1600 caràcters), **no calia trossejar-los en absolut**. `CHUNK_SIZE=2000`
+fa que cada `.md` esdevingui un sol fragment sencer (la unitat semàntica
+natural aquí), i `K_FRAGMENTS=2` recupera el document més rellevant més un
+de reserva, sense arrossegar documents sense relació. Aquesta lliçó —que
+"pujar chunk_size i k" no és sempre la resposta, i que la mida de chunk
+correcta depèn de la mida real dels documents— és exactament el tipus de
+matís que val la pena poder explicar en una entrevista sobre testing de RAG.
 
 **Determinisme:** el retrieval (Chroma) és pràcticament determinista — la
 mateixa pregunta recupera sempre els mateixos fragments. La generació de la
