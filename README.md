@@ -104,10 +104,7 @@ Amb els documents inclosos a `data/docs/`, pots provar:
 malament unes altres a les mateixes preguntes sobre els mateixos
 documents. Aquesta secció no documenta un problema arreglat — documenta
 el procés de prova i error, què s'ha après de cada intent, i què quedaria
-per provar amb més temps. És exactament el tipus de registre que té
-sentit portar quan es testeja un sistema d'IA: no totes les baules es
-resolen en un cap de setmana, i saber explicar per què no és tan
-valuós com tenir-ho tot perfecte.
+per provar amb més temps.
 
 **Punt de partida:** `CHUNK_SIZE=500`, `CHUNK_OVERLAP=100`, `K_FRAGMENTS=3`.
 Símptoma original: la pregunta *"quins models de deep learning es van fer
