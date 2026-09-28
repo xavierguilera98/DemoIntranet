@@ -28,7 +28,7 @@ CHROMA_PERSIST_DIR = os.environ.get("CHROMA_PERSIST_DIR", "./chroma_db")
 # documents curts com els d'aquesta demo, un k massa baix pot deixar
 # fora el fragment correcte si la coincidència semàntica no és
 # literal (vegeu mostrar_fragments_recuperats() per diagnosticar-ho).
-K_FRAGMENTS = 4
+K_FRAGMENTS = 3
 
 PROMPT_TEMPLATE = """Ets un assistent que respon nomes fent servir el
 context proporcionat. Si la resposta no es troba al context, digues
