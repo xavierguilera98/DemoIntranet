@@ -132,8 +132,8 @@ retrospectiva no permet saber quin va ser el determinant — una lliçó
 metodològica en si mateixa: **canviar una sola variable per prova**).
 
 **Estat després d'aquest registre:** s'ha tornat als valors de partida
-(`chunk_size=500`, `chunk_overlap=100`, `k=3`). `temperature=0.0` es
-manté (no s'ha confirmat que sigui la causa del problema de
+(`chunk_size=500`, `chunk_overlap=100`, `k=3`). `temperature=0.2` es
+canvia (tot i que no s'ha confirmat que sigui la causa del problema de
 l'Experiment 2, i en principi hauria de fer les respostes més
 consistents, no pitjors — però tampoc s'ha aïllat i comprovat a part).
 
