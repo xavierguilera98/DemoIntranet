@@ -145,7 +145,4 @@ inclouria:
 
 ## Context
 
-Aquest projecte es va muntar com a preparació per a una entrevista
-per a un lloc d'enginyer d'IA junior, on la feina consisteix a
-treballar sobre un sistema amb aquest mateix plantejament: IA local
-per protegir la confidencialitat de dades de client.
+Aquest projecte es va muntar com una demo de xatbot + intranet local
