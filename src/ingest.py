@@ -34,7 +34,7 @@ DOCS_DIR = Path(__file__).resolve().parent.parent / "data" / "docs"
 # noms dels models) — això fa que la cerca no trobi el fragment
 # correcte encara que la resposta hi sigui. Fragments una mica més
 # grans redueixen aquest risc als documents curts d'aquesta demo.
-CHUNK_SIZE = 800
+CHUNK_SIZE = 500
 CHUNK_OVERLAP = 100
 
 
