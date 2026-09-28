@@ -24,13 +24,9 @@ CHAT_MODEL = os.environ.get("CHAT_MODEL", "llama3.2:1b")
 EMBEDDING_MODEL = os.environ.get("EMBEDDING_MODEL", "nomic-embed-text")
 CHROMA_PERSIST_DIR = os.environ.get("CHROMA_PERSIST_DIR", "./chroma_db")
 
-# Nombre de fragments que es recuperen per cada pregunta. Ara que
-# ingest.py fa que cada document sencer sigui un sol fragment (vegeu
-# CHUNK_SIZE allà), un k alt no aporta res útil: cada unitat ja és un
-# document complet, així que recuperar-ne masses només arrossega
-# documents sense relació amb la pregunta i confon el model. k=2
-# dona el document més rellevant més un de reserva.
-K_FRAGMENTS = 2
+# Valor de partida. Vegeu la secció "Registre d'experimentació" al
+# README: s'han provat k més alts sense un resultat clarament millor.
+K_FRAGMENTS = 3
 
 PROMPT_TEMPLATE = """Ets un assistent que respon nomes fent servir el
 context proporcionat. Si la resposta no es troba al context, digues

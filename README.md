@@ -97,49 +97,83 @@ Amb els documents inclosos a `data/docs/`, pots provar:
 - «Quina API exposa Ollama?» (hauria de dir que no ho sap — no és
   informació que hi hagi als documents indexats)
 
-## Diagnosticar respostes dolentes (retrieval vs. model)
+## Registre d'experimentació: fiabilitat de les respostes
 
-Quan el xatbot no respon bé, val la pena distingir **on** falla:
+**Estat actual: obert, no resolt.** Amb el model petit d'aquesta demo
+(`llama3.2:1b`, sense GPU), el xatbot respon bé algunes vegades i
+malament unes altres a les mateixes preguntes sobre els mateixos
+documents. Aquesta secció no documenta un problema arreglat — documenta
+el procés de prova i error, què s'ha après de cada intent, i què quedaria
+per provar amb més temps. És exactament el tipus de registre que té
+sentit portar quan es testeja un sistema d'IA: no totes les baules es
+resolen en un cap de setmana, i saber explicar per què no és tan
+valuós com tenir-ho tot perfecte.
 
-- **Falla el retrieval** (el fragment amb la resposta ni s'ha recuperat) → cal
-  revisar `K_FRAGMENTS` a `src/rag.py` o com es trossegen els documents a
-  `src/ingest.py`.
-- **Falla el model** (el document correcte s'ha recuperat, però la resposta
-  segueix sent dolenta o inventada) → és una limitació del model de xat
-  triat (`llama3.2:1b` és molt petit); caldria un model més gran.
+**Punt de partida:** `CHUNK_SIZE=500`, `CHUNK_OVERLAP=100`, `K_FRAGMENTS=3`.
+Símptoma original: la pregunta *"quins models de deep learning es van fer
+servir al TFM?"* no es responia, tot i que la informació és als documents.
 
-**Sobre chunk_size i k, un avís d'una regressió real:** la primera versió
-d'aquesta demo trossejava els documents en fragments petits (`chunk_size=500`)
-i recuperava `k=3`. Amb la pregunta *"quins models de deep learning es van
-fer servir al TFM?"* fallava perquè el splitter sempre talla als títols
-(`##`), així que la frase amb "deep learning" i la llista de models queien en
-fragments diferents — i `k=3` no n'incloia prou perquè hi coincidissin
-tots dos. Pujar `chunk_size` a 800 **no ho arregla** (el tall segueix sent
-al mateix lloc); calia pujar `k` a 4 perquè els dos fragments hi cabessin
-alhora. Però amb un corpus de només ~20 fragments en total, `k=4` arrossega
-gairebé mig corpus a cada pregunta — inclosos trossos sense relació —, i un
-model tan petit es confon amb tant de context barrejat i acaba responent
-"no ho sé" fins i tot quan la informació hi és.
+**Experiment 1 — pujar chunk_size i k (`800`/`4`).** Hipòtesi: el
+splitter separa la frase de context ("deep learning") de la llista de
+models (secció `## Models explorats`) en fragments diferents; un `k`
+més alt hauria de recuperar-los tots dos alhora. Resultat comprovat amb
+`--debug`: la hipòtesi sobre el tall era certa (el splitter sempre talla
+als títols, independentment de `chunk_size`), però l'efecte net va ser
+pitjor — amb un corpus de només ~20 fragments, `k=4` arrossega gairebé
+mig corpus a cada pregunta, i el model es va confondre amb tant context
+barrejat: gairebé totes les respostes van passar a ser "no ho sé".
 
-La solució final: amb documents tan curts com els d'aquesta demo (cap supera
-els ~1600 caràcters), **no calia trossejar-los en absolut**. `CHUNK_SIZE=2000`
-fa que cada `.md` esdevingui un sol fragment sencer (la unitat semàntica
-natural aquí), i `K_FRAGMENTS=2` recupera el document més rellevant més un
-de reserva, sense arrossegar documents sense relació. Aquesta lliçó —que
-"pujar chunk_size i k" no és sempre la resposta, i que la mida de chunk
-correcta depèn de la mida real dels documents— és exactament el tipus de
-matís que val la pena poder explicar en una entrevista sobre testing de RAG.
+**Experiment 2 — indexar cada document sencer (`chunk_size=2000`,
+`k=2`) + `temperature=0.0`.** Hipòtesi: amb documents tan curts
+(cap supera ~1600 caràcters), no calia trossejar-los — cada `.md` ja és
+la unitat semàntica correcta. Resultat reportat: **tampoc no va
+funcionar de manera fiable** — el xatbot va deixar de saber respondre
+gairebé cap pregunta. No es va aïllar si la causa era el chunking per
+document, el `k=2`, la baixada de `temperature` a 0, o una combinació
+de totes tres (es van canviar diversos paràmetres alhora, cosa que en
+retrospectiva no permet saber quin va ser el determinant — una lliçó
+metodològica en si mateixa: **canviar una sola variable per prova**).
 
-**Determinisme:** el retrieval (Chroma) és pràcticament determinista — la
-mateixa pregunta recupera sempre els mateixos fragments. La generació de la
-resposta (`ChatOllama`) és qui pot variar entre crides, perquè un LLM
-mostreja la següent paraula segons `temperature` en lloc d'escollir sempre
-la més probable. Aquest repositori fa servir `temperature=0.0` perquè la
-resposta sigui reproduïble (mateixa pregunta + mateix context → mateixa
-resposta) — a costa de perdre la variació "creativa" que és útil en un xat
-conversacional però no en un cas d'ús de RAG/QA.
+**Estat després d'aquest registre:** s'ha tornat als valors de partida
+(`chunk_size=500`, `chunk_overlap=100`, `k=3`). `temperature=0.0` es
+manté (no s'ha confirmat que sigui la causa del problema de
+l'Experiment 2, i en principi hauria de fer les respostes més
+consistents, no pitjors — però tampoc s'ha aïllat i comprovat a part).
 
-Per veure exactament quins fragments es recuperen per a cada pregunta:
+### Possibles passos següents (no provats encara)
+
+- **Provar-ho amb rigor, una variable cada cop:** fixar un petit joc de
+  preguntes amb resposta esperada (les 4 d'exemple de dalt en són un bon
+  punt de partida), repetir cada pregunta diverses vegades per configuració,
+  i anotar el % d'encerts. Sense això, és fàcil confondre soroll aleatori
+  (recordeu la discussió sobre `temperature`) amb un efecte real d'un
+  paràmetre.
+- **Prefixos d'instrucció per a `nomic-embed-text`:** aquest model
+  d'embeddings està documentat per rendir millor si les consultes es
+  prefixen amb `"search_query: "` i els documents amb `"search_document: "`
+  abans de vectoritzar-los. El codi actual no ho fa — podria ser una causa
+  real (i fàcil d'arreglar) de retrieval poc fiable, independent de
+  `chunk_size` o `k`.
+- **`num_ctx` de `ChatOllama`:** no s'ha comprovat si el context complet
+  (documents recuperats + pregunta + prompt) es trunca silenciosament pel
+  límit de context per defecte d'Ollama. Fixar `num_ctx` explícitament
+  (ex. 4096) descartaria aquesta possibilitat.
+- **Suavitzar la instrucció "no t'ho inventis" del prompt:** un model tan
+  petit pot estar sobre-aplicant aquesta instrucció i refusant respondre
+  fins i tot quan la informació hi és, per excés de cautela. Val la pena
+  provar variants del prompt.
+- **Un model de xat més gran** (`llama3.2:3b` o similar) si el maquinari ho
+  aguanta: els models d'1B són coneguts per ser inconsistents seguint
+  instruccions, independentment de si el retrieval és perfecte.
+- **Un embedding multilingüe diferent:** `nomic-embed-text` no és
+  específicament fort en català; un model d'embeddings amb millor suport
+  multilingüe podria millorar la qualitat del retrieval sense tocar cap
+  altre paràmetre.
+
+Per investigar qualsevol d'aquests punts, `--debug` continua sent l'eina
+per distingir si el problema és de retrieval (el fragment correcte no
+s'ha recuperat) o del model (s'ha recuperat bé, però la resposta és
+dolenta o inconsistent igualment):
 
 ```bash
 docker compose exec app python src/rag.py --debug
