@@ -99,7 +99,7 @@ def construir_cadena(retriever=None):
         # context recuperat, doni respostes diferents en cada crida.
         # Per a un cas d'ús de RAG/QA (volem consistència, no
         # creativitat), temperature=0 és la pràctica estàndard.
-        temperature=0.0,
+        temperature=0.2,
     )
 
     prompt = ChatPromptTemplate.from_template(PROMPT_TEMPLATE)
